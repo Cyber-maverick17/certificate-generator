@@ -1,71 +1,143 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
 <title>Certificate Generator</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
 
 body{
-font-family: Arial;
+font-family: 'Times New Roman';
+background:#f4f4f4;
 text-align:center;
-background:#f2f2f2;
 }
+
+/* INPUTS */
 
 input{
 padding:8px;
-margin:5px;
+margin:6px;
+width:260px;
 }
 
 button{
-padding:10px 20px;
-background:green;
-color:white;
-border:none;
+padding:10px 18px;
+margin:10px;
 cursor:pointer;
 }
 
+/* CERTIFICATE */
+
 #certificate{
-width:900px;
+
+width:1000px;
 height:600px;
-margin:30px auto;
+
+margin:auto;
+margin-top:30px;
+
 background:white;
-border:15px solid #d4af37;
+
+border:15px solid #c9a646;   /* professional gold border */
+
+padding:50px;
+
 position:relative;
-padding:40px;
+
+display:none;
+
+box-shadow:0 0 10px gray;
+
 }
 
+/* CORNER DESIGN */
+
+.corner{
+position:absolute;
+font-size:28px;
+color:#c9a646;
+}
+
+.c1{top:10px;left:20px;}
+.c2{top:10px;right:20px;}
+.c3{bottom:10px;left:20px;}
+.c4{bottom:10px;right:20px;}
+
+/* LOGO */
+
 .logo{
+position:absolute;
+top:30px;
+left:40px;
 width:100px;
 }
 
-.signature{
-width:150px;
-margin-top:40px;
-}
+/* PHOTO */
 
-.watermark{
+.photo{
 position:absolute;
-top:150px;
-left:250px;
-opacity:0.08;
-width:400px;
-}
-
-/* Photo right side */
-
-.photo-box{
-position:absolute;
-top:120px;
-right:50px;
+top:30px;
+right:40px;
 width:120px;
 height:150px;
-border:2px solid #000;
+border:2px solid black;
+object-fit:cover;
 }
 
-.photo-box img{
-width:100%;
-height:100%;
-object-fit:cover;
+/* TEXT */
+
+.heading{
+font-size:32px;
+font-weight:bold;
+margin-top:30px;
+}
+
+.title{
+font-size:40px;
+margin-top:10px;
+}
+
+.name{
+font-size:36px;
+font-weight:bold;
+margin:20px;
+}
+
+.sentence{
+font-size:22px;
+}
+
+.event{
+font-size:26px;
+margin-top:10px;
+}
+
+/* DATE & PLACE */
+
+.bottomLeft{
+position:absolute;
+bottom:40px;
+left:60px;
+font-size:18px;
+text-align:left;
+}
+
+/* SIGNATURE */
+
+.signature{
+position:absolute;
+bottom:40px;
+right:80px;
+text-align:center;
+}
+
+.line{
+border-top:2px solid black;
+width:200px;
+margin:auto;
+margin-bottom:5px;
 }
 
 </style>
@@ -73,39 +145,65 @@ object-fit:cover;
 
 <body>
 
-<h1>Certificate Generator</h1>
+<h2>Certificate Generator</h2>
 
-<input type="text" id="name" placeholder="Enter Student Name">
-<input type="date" id="date">
-<input type="file" id="photo">
+<input type="text" id="heading" placeholder="Institution Name"><br>
 
-<br><br>
+<input type="text" id="name" placeholder="Student Name"><br>
+
+<input type="text" id="sentence" placeholder="Sentence (Example: For successfully completing)"><br>
+
+<input type="text" id="event" placeholder="Event Name"><br>
+
+<input type="text" id="place" placeholder="Place"><br>
+
+<input type="date" id="date"><br>
+
+<label>Upload Logo</label><br>
+<input type="file" id="logo"><br>
+
+<label>Upload Student Photo</label><br>
+<input type="file" id="photo"><br>
 
 <button onclick="generate()">Generate Certificate</button>
 
+<button onclick="downloadPDF()">Download as PDF</button>
+
+
 <div id="certificate">
 
-<img src="logo.png" class="logo">
+<div class="corner c1">❀</div>
+<div class="corner c2">❀</div>
+<div class="corner c3">❀</div>
+<div class="corner c4">❀</div>
 
-<h1>CERTIFICATE OF ACHIEVEMENT</h1>
+<img id="certLogo" class="logo">
+<img id="certPhoto" class="photo">
+
+<div class="heading" id="certHeading"></div>
+
+<div class="title">Certificate of Achievement</div>
 
 <p>This certificate is proudly presented to</p>
 
-<h2 id="studentName">Student Name</h2>
+<div class="name" id="certName"></div>
 
-<p>For successfully completing the course.</p>
+<div class="sentence" id="certSentence"></div>
 
-<p id="certDate"></p>
+<div class="event" id="certEvent"></div>
 
-<img src="watermark.png" class="watermark">
-
-<div class="photo-box">
-<img id="studentPhoto">
+<div class="bottomLeft">
+Date: <span id="certDate"></span><br>
+Place: <span id="certPlace"></span>
 </div>
 
-<img src="sign.png" class="signature">
+<div class="signature">
 
-<p>Authorized Signature</p>
+<div class="line"></div>
+
+Authorized Signature
+
+</div>
 
 </div>
 
@@ -113,20 +211,63 @@ object-fit:cover;
 
 function generate(){
 
-var name=document.getElementById("name").value;
-var date=document.getElementById("date").value;
+document.getElementById("certificate").style.display="block";
 
-document.getElementById("studentName").innerHTML=name;
-document.getElementById("certDate").innerHTML=date;
+document.getElementById("certHeading").innerText=document.getElementById("heading").value;
 
-var file=document.getElementById("photo").files[0];
-var reader=new FileReader();
+document.getElementById("certName").innerText=document.getElementById("name").value;
+
+document.getElementById("certSentence").innerText=document.getElementById("sentence").value;
+
+document.getElementById("certEvent").innerText=document.getElementById("event").value;
+
+document.getElementById("certDate").innerText=document.getElementById("date").value;
+
+document.getElementById("certPlace").innerText=document.getElementById("place").value;
+
+/* LOGO */
+
+let logo=document.getElementById("logo").files[0];
+
+if(logo){
+
+let reader=new FileReader();
 
 reader.onload=function(e){
-document.getElementById("studentPhoto").src=e.target.result;
+
+document.getElementById("certLogo").src=e.target.result;
+
 }
 
-reader.readAsDataURL(file);
+reader.readAsDataURL(logo);
+
+}
+
+/* PHOTO */
+
+let photo=document.getElementById("photo").files[0];
+
+if(photo){
+
+let reader=new FileReader();
+
+reader.onload=function(e){
+
+document.getElementById("certPhoto").src=e.target.result;
+
+}
+
+reader.readAsDataURL(photo);
+
+}
+
+}
+
+function downloadPDF(){
+
+var element=document.getElementById("certificate");
+
+html2pdf().from(element).save("certificate.pdf");
 
 }
 
@@ -134,3 +275,4 @@ reader.readAsDataURL(file);
 
 </body>
 </html>
+```
